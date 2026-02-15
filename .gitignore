@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.log
+.vscode/
+.idea/
+venv/
+env/
+temp_blog.html
+extracted_blog_content.txt
