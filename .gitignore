@@ -8,4 +8,7 @@ venv/
 env/
 temp_blog.html
 extracted_blog_content.txt
-Github setup.py
+
+# API 키 및 환경 변수 파일 (절대 업로드 금지)
+.env
+*.env

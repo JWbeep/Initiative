@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>블로그 URL 수집기</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 400px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: 'Consolas', monospace;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .hint {
+            color: #999;
+            font-size: 0.85em;
+            margin-top: 8px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-clear {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .btn-clear:hover {
+            background: #e0e0e0;
+        }
+
+        .counter {
+            text-align: right;
+            color: #667eea;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .success-message {
+            background: #4caf50;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🌐 블로그 URL 수집기</h1>
+        <p class="subtitle">여자친구분의 블로그 글 URL을 한 줄에 하나씩 입력해 주세요 (최대 30개)</p>
+
+        <div class="input-group">
+            <label for="urls">블로그 URL 목록</label>
+            <textarea id="urls" placeholder="https://blog.naver.com/moon-over/223879064676
+https://blog.naver.com/moon-over/223879064677
+https://blog.naver.com/moon-over/223879064678
+..."></textarea>
+            <p class="hint">💡 팁: 한 줄에 하나의 URL만 입력하세요. 빈 줄은 자동으로 무시됩니다.</p>
+            <div class="counter">입력된 URL: <span id="count">0</span>개</div>
+        </div>
+
+        <div class="button-group">
+            <button class="btn-clear" onclick="clearUrls()">🗑️ 전체 삭제</button>
+            <button class="btn-save" onclick="saveUrls()">💾 저장하기</button>
+        </div>
+
+        <div class="success-message" id="successMsg">
+            ✅ URL 목록이 성공적으로 저장되었습니다!
+        </div>
+    </div>
+
+    <script>
+        const textarea = document.getElementById('urls');
+        const countSpan = document.getElementById('count');
+        const successMsg = document.getElementById('successMsg');
+
+        // URL 개수 실시간 업데이트
+        textarea.addEventListener('input', updateCount);
+
+        function updateCount() {
+            const urls = textarea.value.split('\n').filter(line => line.trim() !== '');
+            countSpan.textContent = urls.length;
+
+            if (urls.length > 30) {
+                countSpan.style.color = '#f44336';
+            } else {
+                countSpan.style.color = '#667eea';
+            }
+        }
+
+        function clearUrls() {
+            if (confirm('정말로 모든 URL을 삭제하시겠습니까?')) {
+                textarea.value = '';
+                updateCount();
+                successMsg.style.display = 'none';
+            }
+        }
+
+        function saveUrls() {
+            const urls = textarea.value.split('\n')
+                .map(line => line.trim())
+                .filter(line => line !== '');
+
+            if (urls.length === 0) {
+                alert('❌ URL을 최소 1개 이상 입력해 주세요!');
+                return;
+            }
+
+            if (urls.length > 30) {
+                alert('⚠️ URL은 최대 30개까지만 입력할 수 있습니다!');
+                return;
+            }
+
+            // URL 유효성 검사
+            const invalidUrls = urls.filter(url => !url.startsWith('http'));
+            if (invalidUrls.length > 0) {
+                alert('❌ 잘못된 URL 형식이 있습니다. http:// 또는 https://로 시작해야 합니다.');
+                return;
+            }
+
+            // JSON 파일로 저장
+            const data = {
+                urls: urls,
+                count: urls.length,
+                timestamp: new Date().toISOString()
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'blog_urls.json';
+            a.click();
+
+            successMsg.style.display = 'block';
+            setTimeout(() => {
+                successMsg.style.display = 'none';
+            }, 3000);
+        }
+
+        // 페이지 로드 시 카운트 업데이트
+        updateCount();
+    </script>
+</body>
+
+</html>
