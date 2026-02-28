@@ -144,9 +144,50 @@ def main():
                         st.error(f"오류가 발생했습니다: {e}")
 
     with col2:
-        st.subheader("✨ 생성된 블로그 초안")
         if st.session_state.generated_post:
-            st.text_area("결과물 (복사해서 사용하세요)", st.session_state.generated_post, height=600)
+            # 제목과 복사 버튼을 한 줄에 배치
+            res_col1, res_col2 = st.columns([3, 1])
+            res_col1.subheader("✨ 생성된 블로그 초안")
+            
+            # JavaScript를 활용한 복사 기능 구현
+            copy_text = st.session_state.generated_post.replace("'", "\\'").replace("\n", "\\n")
+            copy_js = f"""
+                <script>
+                function copyToClipboard() {{
+                    const text = `{copy_text}`;
+                    navigator.clipboard.writeText(text).then(() => {{
+                        const btn = document.getElementById('copy-btn');
+                        const originalText = btn.innerHTML;
+                        btn.innerHTML = '✅ 복사 완료!';
+                        btn.style.background = '#4caf50';
+                        setTimeout(() => {{
+                            btn.innerHTML = originalText;
+                            btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                        }}, 2000);
+                    }}).catch(err => {{
+                        console.error('복사 실패:', err);
+                        alert('복사에 실패했습니다.');
+                    }});
+                }}
+                </script>
+                <button id="copy-btn" onclick="copyToClipboard()" style="
+                    width: 100%;
+                    padding: 8px 16px;
+                    border: none;
+                    border-radius: 8px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                ">
+                    📋 복사하기
+                </button>
+            """
+            with res_col2:
+                st.components.v1.html(copy_js, height=50)
+
+            st.text_area("결과물 (복사해서 사용하세요)", st.session_state.generated_post, height=600, label_visibility="collapsed")
             
             # 다운로드 버튼
             st.download_button(
@@ -156,6 +197,7 @@ def main():
                 mime="text/plain"
             )
         else:
+            st.subheader("✨ 생성된 블로그 초안")
             st.info("왼쪽에서 정보를 입력하고 '생성 시작' 버튼을 눌러주세요.")
 
     # 하단 정보
