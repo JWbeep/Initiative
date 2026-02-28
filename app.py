@@ -189,13 +189,7 @@ def main():
 
             st.text_area("결과물 (복사해서 사용하세요)", st.session_state.generated_post, height=600, label_visibility="collapsed")
             
-            # 다운로드 버튼
-            st.download_button(
-                label="📥 텍스트 파일로 저장",
-                data=st.session_state.generated_post,
-                file_name=f"generated_post.txt",
-                mime="text/plain"
-            )
+
         else:
             st.subheader("✨ 생성된 블로그 초안")
             st.info("왼쪽에서 정보를 입력하고 '생성 시작' 버튼을 눌러주세요.")
