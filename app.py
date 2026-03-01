@@ -150,7 +150,12 @@ def main():
                         result_placeholder = st.empty()
                         full_text = ""
                         
-                        for chunk in gen.generate_stream(topic, keyword_list, menu_list, must_include_list):
+                        for chunk in gen.generate_stream(
+                            topic=topic, 
+                            keyword_list=keyword_list, 
+                            menu_list=menu_list, 
+                            must_include_list=must_include_list
+                        ):
                             full_text += chunk
                             result_placeholder.text_area("실시간 생성 중...", full_text, height=400)
                         
