@@ -1,6 +1,7 @@
 
 import streamlit as st
 import os
+import re
 from generator import BlogGenerator
 
 # 페이지 설정
@@ -137,6 +138,8 @@ def main():
                             full_text += chunk
                             result_placeholder.text_area("실시간 생성 중...", full_text, height=400)
                         
+                        # ** 마크다운 굵게 표시 제거 (프롬프트로 막아도 LLM이 생성할 수 있으므로 후처리로 확실히 제거)
+                        full_text = re.sub(r'\*\*(.*?)\*\*', r'\1', full_text, flags=re.DOTALL)
                         st.session_state.generated_post = full_text
                         st.success("글 생성이 완료되었습니다!")
                         st.rerun()
