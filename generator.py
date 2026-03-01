@@ -29,11 +29,12 @@ class BlogGenerator:
         
         return style_context
 
-    def _build_prompt(self, topic, keyword_list=None, menu_list=None):
+    def _build_prompt(self, topic, keyword_list=None, menu_list=None, must_include_list=None):
         """
         System Prompt와 사용자 요청을 한 곳에서 생성합니다.
         keyword_list: [(keyword, count), ...] 형태의 리스트
         menu_list:    [(menu_name, price), ...] 형태의 리스트
+        must_include_list: ["내용1", "내용2", ...] 형태의 리스트
         """
         style_examples = self.get_style_examples(num_examples=4)
 
@@ -74,11 +75,18 @@ class BlogGenerator:
             lines = [f"  - {name}: {price:,}원" for name, price in menu_list]
             menu_section = "\n대표메뉴 및 가격:\n" + "\n".join(lines)
 
+        # 반드시 포함해야 하는 내용
+        must_include_section = ""
+        if must_include_list:
+            lines = [f"  - {sentence}" for sentence in must_include_list]
+            must_include_section = "\n\n[반드시 포함해야 하는 내용]\n" + "\n".join(lines) + "\n(위 문장들을 맥락에 맞게 자연스럽게 녹여내서 작성해줘.)"
+
         user_content = (
             f"주제: {topic}\n"
             f"키워드: {keyword_summary}"
             f"{menu_section}"
-            f"{keyword_rules}\n\n"
+            f"{keyword_rules}"
+            f"{must_include_section}\n\n"
             f"위 주제와 키워드를 바탕으로 블로그 포스팅을 작성해줘. "
             f"메뉴와 가격이 있다면 글 안에 자연스럽게 언급해줘. "
             f"필수 키워드 규칙을 반드시 지켜서 각 키워드가 지정된 횟수 이상 본문에 등장하도록 해줘."
@@ -86,11 +94,11 @@ class BlogGenerator:
 
         return system_prompt, user_content
 
-    def generate(self, topic, keyword_list=None, menu_list=None):
+    def generate(self, topic, keyword_list=None, menu_list=None, must_include_list=None):
         """
         주제와 키워드를 바탕으로 블로그 글을 생성합니다. (한 번에 완성본 반환)
         """
-        system_prompt, user_content = self._build_prompt(topic, keyword_list, menu_list)
+        system_prompt, user_content = self._build_prompt(topic, keyword_list, menu_list, must_include_list)
 
         print(f"[정보] '{topic}' 주제로 AI에게 집필 요청을 보냅니다...")
         generated_blog = self.llm.generate_text(system_prompt, user_content)
@@ -98,12 +106,12 @@ class BlogGenerator:
         
         return generated_blog
     
-    def generate_stream(self, topic, keyword_list=None, menu_list=None):
+    def generate_stream(self, topic, keyword_list=None, menu_list=None, must_include_list=None):
         """
         스트리밍 방식으로 블로그 글을 생성합니다. (실시간 한 글자씩 출력)
         """
         print("[정보] 스타일 예시를 재료 창고에서 꺼내오는 중...")
-        system_prompt, user_content = self._build_prompt(topic, keyword_list, menu_list)
+        system_prompt, user_content = self._build_prompt(topic, keyword_list, menu_list, must_include_list)
         print("[정보] 스타일 예시 준비 완료. AI에게 스트리밍 집필 요청...")
 
         for chunk in self.llm.generate_text_stream(system_prompt, user_content):

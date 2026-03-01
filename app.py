@@ -63,8 +63,8 @@ def main():
 
         topic = st.text_input("📍 블로그 주제", placeholder="예: 용인 수지 맛집 '도넛 하우스' 방문기")
 
-        # ── 핵심 키워드 (최대 7개) ──────────────────────────────────
-        st.markdown("**🔑 핵심 키워드 및 반복 횟수** (최대 7개)")
+        # ── 핵심 키워드 (최대 4개) ──────────────────────────────────
+        st.markdown("**🔑 핵심 키워드 및 반복 횟수** (최대 4개)")
         st.caption("키워드를 입력하고, 본문에 반드시 등장해야 하는 최소 횟수를 설정하세요.")
 
         hcol1, hcol2, hcol3 = st.columns([3, 1, 0.3])
@@ -73,7 +73,7 @@ def main():
         hcol3.markdown("<small>&nbsp;</small>", unsafe_allow_html=True)
 
         keyword_list = []
-        for i in range(7):
+        for i in range(4):
             kcol1, kcol2, kcol3 = st.columns([3, 1, 0.3])
             kw = kcol1.text_input(
                 f"키워드 {i+1}",
@@ -93,8 +93,8 @@ def main():
             if kw.strip():
                 keyword_list.append((kw.strip(), int(cnt)))
 
-        # ── 대표 메뉴 및 가격 (최대 7개) ────────────────────────────
-        st.markdown("**🍽️ 대표 메뉴 및 가격** (선택, 최대 7개)")
+        # ── 대표 메뉴 및 가격 (최대 5개) ────────────────────────────
+        st.markdown("**🍽️ 대표 메뉴 및 가격** (선택, 최대 5개)")
         st.caption("메뉴명을 입력하고 가격은 숫자만 입력하세요.")
 
         mhcol1, mhcol2, mhcol3 = st.columns([3, 1, 0.3])
@@ -103,7 +103,7 @@ def main():
         mhcol3.markdown("<small>&nbsp;</small>", unsafe_allow_html=True)
 
         menu_list = []
-        for i in range(7):
+        for i in range(5):
             mcol1, mcol2, mcol3 = st.columns([3, 1, 0.3])
             menu_name = mcol1.text_input(
                 f"메뉴 {i+1}",
@@ -124,6 +124,22 @@ def main():
             if menu_name.strip() and price > 0:
                 menu_list.append((menu_name.strip(), price))
         
+        # ── 반드시 포함해야 하는 내용 (최대 3개) ────────────────────────────
+        st.markdown("**📌 반드시 포함해야 하는 내용** (선택, 최대 3개)")
+        st.caption("AI가 글을 작성할 때 반드시 포함시킬 문장을 입력하세요. (예: 우트우트에서는 로스팅도 하고 있어서, 직접 로스팅한 원두와 드립백도 판매하고 있어요)")
+
+        must_include_list = []
+        for i in range(3):
+            sentence = st.text_area(
+                f"내용 {i+1}",
+                key=f"must_include_{i}",
+                placeholder="여기에 문장을 입력하세요...",
+                label_visibility="collapsed",
+                height=120
+            )
+            if sentence.strip():
+                must_include_list.append(sentence.strip())
+        
         if st.button("🚀 블로그 글 생성 시작"):
             if not topic:
                 st.error("주제를 입력해 주세요!")
@@ -134,7 +150,7 @@ def main():
                         result_placeholder = st.empty()
                         full_text = ""
                         
-                        for chunk in gen.generate_stream(topic, keyword_list, menu_list):
+                        for chunk in gen.generate_stream(topic, keyword_list, menu_list, must_include_list):
                             full_text += chunk
                             result_placeholder.text_area("실시간 생성 중...", full_text, height=400)
                         
