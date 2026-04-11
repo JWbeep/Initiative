@@ -8,8 +8,9 @@ def get_place_info_from_url(url):
     네이버 지도 URL에서 장소의 주차, 영업시간, 전화번호를 추출합니다.
     (실패 시 None을 반환하거나 부분 데이터를 반환합니다)
     """
-    # 1. URL에서 장소 ID 추출
-    match = re.search(r'/place/(\d+)', url)
+    # 1. URL에서 장소 ID 추출 (PC 및 모바일 URL 범용 지원)
+    # PC: /place/12345678, 모바일: /restaurant/12345678/home 등 다양한 카테고리를 위해 숫자 8~12자리 탐색
+    match = re.search(r'/(\d{8,12})(?:/|\?|$)', url)
     if not match:
         return {"error": "URL에서 장소 ID를 찾을 수 없습니다."}
     
