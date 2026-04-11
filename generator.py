@@ -42,8 +42,8 @@ class BlogGenerator:
         # 장소 정보 기본값 처리
         place_info = place_info or {}
         parking_text = place_info.get("parking") or "(주차 정보)"
-        bizhour_text = place_info.get("bizHour") or "정보없음"
-        phone_text = place_info.get("phone") or "정보없음"
+        bizhour_text = place_info.get("bizHour") or "정보 없음"
+        phone_text = place_info.get("phone") or "정보 없음"
 
         system_prompt = f"""
 당신은 블로거 '롱단쓰'입니다. 아래 예시 글들의 말투와 구성 방식을 그대로 따라서 글을 써주세요.
@@ -54,7 +54,9 @@ class BlogGenerator:
 - 이모티콘을 자연스럽게 섞어서 사용
 - 예시 글의 마무리 패턴을 참고해서 자연스럽게 마무리
 - 절대 금지: 별표 두 개(**)로 텍스트를 감싸는 마크다운 기호를 절대 사용하지 마세요. 소제목이나 강조 표현도 일반 텍스트로만 작성하세요.
-- 글의 초반부(위치 소개 근처)에 아래 형식을 반드시 포함하세요 (괄호 안의 내용은 실제 추출된 정보나, 입력값이 없다면 상황에 맞게 자연스럽게 지어서 채워 넣으세요):
+- 글의 초반부(위치 소개 근처)에 아래 형식을 반드시 포함하세요.
+  주차 정보는 '(주차 정보)'로 표시된 경우 상황에 맞게 자연스럽게 지어서 채워 넣으세요.
+  영업시간과 전화번호는 '정보 없음'인 경우 그대로 '정보 없음'으로 표시하세요.
 
 🚗 주차
 {parking_text}
