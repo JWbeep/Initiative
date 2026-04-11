@@ -29,35 +29,41 @@ class BlogGenerator:
         
         return style_context
 
-    def _build_prompt(self, topic, keyword_list=None, menu_list=None, must_include_list=None, **kwargs):
+    def _build_prompt(self, topic, keyword_list=None, menu_list=None, must_include_list=None, place_info=None, **kwargs):
         """
         System Prompt와 사용자 요청을 한 곳에서 생성합니다.
         keyword_list: [(keyword, count), ...] 형태의 리스트
         menu_list:    [(menu_name, price), ...] 형태의 리스트
         must_include_list: ["내용1", "내용2", ...] 형태의 리스트
+        place_info: {"parking": "...", "bizHour": "...", "phone": "..."} 형태의 딕셔너리
         """
         style_examples = self.get_style_examples(num_examples=4)
+
+        # 장소 정보 기본값 처리
+        place_info = place_info or {}
+        parking_text = place_info.get("parking") or "(주차 정보)"
+        bizhour_text = place_info.get("bizHour") or "(영업시간 정보)"
+        phone_text = place_info.get("phone") or "(전화번호 정보)"
 
         system_prompt = f"""
 당신은 블로거 '롱단쓰'입니다. 아래 예시 글들의 말투와 구성 방식을 그대로 따라서 글을 써주세요.
 
 글 구성 규칙:
 - "안녕하세요, 롱단쓰입니다"로 시작
-- "~했답니다", "~하더라구요", "~인 것 같아요", "~거든요" 같은 구어체 어미 사용
+- 구어체 어미 사용
 - 이모티콘을 자연스럽게 섞어서 사용
-- 위치, 메뉴, 가격, 팁을 상세하게 설명
 - 예시 글의 마무리 패턴을 참고해서 자연스럽게 마무리
-- 절대 금지: 별표 두 개(**)로 텍스트를 감싸는 마크다운 굵게 표시를 사용하지 마세요. 소제목이나 강조 표현도 마크다운 기호 없이 일반 텍스트로만 작성하세요.
-- 글의 초반부(위치 소개 근처)에 아래 형식을 반드시 포함하세요 (이모지 포함, 각 항목의 실제 정보를 구체적으로 채워 넣으세요):
+- 절대 금지: 별표 두 개(**)로 텍스트를 감싸는 마크다운 기호를 절대 사용하지 마세요. 소제목이나 강조 표현도 일반 텍스트로만 작성하세요.
+- 글의 초반부(위치 소개 근처)에 아래 형식을 반드시 포함하세요 (괄호 안의 내용은 실제 추출된 정보나, 입력값이 없다면 상황에 맞게 자연스럽게 지어서 채워 넣으세요):
 
 🚗 주차
-(주차 정보)
+{parking_text}
 
 ⏰ 영업시간
-(영업시간 정보)
+{bizhour_text}
 
 ☎️ 전화번호
-(전화번호 정보)
+{phone_text}
 
 {style_examples}
 """
@@ -94,7 +100,7 @@ class BlogGenerator:
 
         return system_prompt, user_content
 
-    def generate(self, topic, keyword_list=None, menu_list=None, must_include_list=None, **kwargs):
+    def generate(self, topic, keyword_list=None, menu_list=None, must_include_list=None, place_info=None, **kwargs):
         """
         주제와 키워드를 바탕으로 블로그 글을 생성합니다. (한 번에 완성본 반환)
         """
@@ -102,12 +108,13 @@ class BlogGenerator:
             topic=topic, 
             keyword_list=keyword_list, 
             menu_list=menu_list, 
-            must_include_list=must_include_list
+            must_include_list=must_include_list,
+            place_info=place_info
         )
 
         return self.llm.generate_text(system_prompt, user_content)
     
-    def generate_stream(self, topic, keyword_list=None, menu_list=None, must_include_list=None, **kwargs):
+    def generate_stream(self, topic, keyword_list=None, menu_list=None, must_include_list=None, place_info=None, **kwargs):
         """
         스트리밍 방식으로 블로그 글을 생성합니다. (실시간 한 글자씩 출력)
         """
@@ -115,7 +122,8 @@ class BlogGenerator:
             topic=topic, 
             keyword_list=keyword_list, 
             menu_list=menu_list, 
-            must_include_list=must_include_list
+            must_include_list=must_include_list,
+            place_info=place_info
         )
 
         for chunk in self.llm.generate_text_stream(system_prompt, user_content):

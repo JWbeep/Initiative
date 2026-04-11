@@ -61,7 +61,11 @@ def main():
             if st.button("새로운 글 수집하러 가기"):
                 st.write("`collect_urls.html`을 열어주세요!")
 
-        topic = st.text_input("📍 블로그 주제", placeholder="예: 용인 수지 맛집 '도넛 하우스' 방문기")
+        st.markdown("**📍 블로그 주제**")
+        topic = st.text_input("📍 블로그 주제", placeholder="예: 용인 수지 맛집 '도넛 하우스' 방문기", label_visibility="collapsed")
+
+        st.markdown("**🗺️ 네이버 지도 URL** (선택)")
+        place_url = st.text_input("네이버 지도 URL", placeholder="예: https://map.naver.com/p/search/... (자동 추출용)", label_visibility="collapsed")
 
         # ── 핵심 키워드 (최대 4개) ──────────────────────────────────
         st.markdown("**🔑 핵심 키워드 및 반복 횟수** (최대 4개)")
@@ -144,6 +148,21 @@ def main():
             if not topic:
                 st.error("주제를 입력해 주세요!")
             else:
+                place_info = {}
+                
+                # 지도 URL 기반 정보 추출 시도
+                if place_url.strip():
+                    with st.spinner("네이버 지도에서 정보 가져오는 중..."):
+                        from blog_generator.modules.place_scraper import get_place_info_from_url
+                        scraped = get_place_info_from_url(place_url.strip())
+                        
+                        if scraped and "error" not in scraped:
+                            st.toast("✅ 네이버 지도 장소 정보 추출 성공!", icon="🎉")
+                            place_info = scraped
+                        else:
+                            err_msg = scraped.get('error', '알 수 없는 오류') if scraped else '파싱 실패'
+                            st.warning(f"⚠️ 네이버 지도 접근/파싱 오류: {err_msg}. 기본값으로 글 작성을 이어갑니다.", icon="⚠️")
+
                 with st.spinner("롱단쓰의 말투를 배우는 중... 잠시만 기다려 주세요!"):
                     try:
                         gen = BlogGenerator()
@@ -154,7 +173,8 @@ def main():
                             topic=topic, 
                             keyword_list=keyword_list, 
                             menu_list=menu_list, 
-                            must_include_list=must_include_list
+                            must_include_list=must_include_list,
+                            place_info=place_info  # 추가된 파라미터
                         ):
                             full_text += chunk
                             result_placeholder.text_area("실시간 생성 중...", full_text, height=400)
