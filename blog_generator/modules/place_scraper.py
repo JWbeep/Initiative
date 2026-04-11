@@ -93,8 +93,17 @@ def get_place_info_from_url(url):
                             days = cat.get("businessHours", [])
                             for day_info in days:
                                 day = day_info.get("day", "")
-                                hours = day_info.get("businessHours", {})
-                                if not hours: continue
+                                hours = day_info.get("businessHours")
+                                
+                                if not hours:
+                                    desc = day_info.get("description")
+                                    if desc:
+                                        if cat_name:
+                                            biz_hour_list.append(f"[{cat_name}] {day} {desc}")
+                                        else:
+                                            biz_hour_list.append(f"{day} {desc}")
+                                    continue
+                                    
                                 start = hours.get("start", "")
                                 end = hours.get("end", "")
                                 
