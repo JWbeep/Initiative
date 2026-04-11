@@ -42,8 +42,8 @@ class BlogGenerator:
         # 장소 정보 기본값 처리
         place_info = place_info or {}
         parking_text = place_info.get("parking") or "(주차 정보)"
-        bizhour_text = place_info.get("bizHour") or "(영업시간 정보)"
-        phone_text = place_info.get("phone") or "(전화번호 정보)"
+        bizhour_text = place_info.get("bizHour") or "정보없음"
+        phone_text = place_info.get("phone") or "정보없음"
 
         system_prompt = f"""
 당신은 블로거 '롱단쓰'입니다. 아래 예시 글들의 말투와 구성 방식을 그대로 따라서 글을 써주세요.
